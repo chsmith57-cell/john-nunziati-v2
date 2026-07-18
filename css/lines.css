@@ -29,11 +29,8 @@
 .sheet-strip { display: flex; gap: clamp(40px, 6vw, 90px); padding-inline: 8vw; will-change: transform; }
 .flow-col { flex: 0 0 clamp(300px, 34vw, 460px); }
 .flow-col .speech-head { white-space: nowrap; }
-@supports (animation-timeline: scroll()) {
-  html.js:not(.reduced) .sheet-strip { animation: traverse linear both; animation-timeline: scroll(root); }
-  /* range set inline per computed geometry by assembly script when supported */
-}
-@keyframes traverse { from { transform: translateX(0); } to { transform: translateX(var(--traverse-x, -60%)); } }
+/* traverse transform is owned solely by the rAF loop (accepted deviation) —
+   a parallel CSS scroll-timeline would override the inline transform and fight it */
 @media (max-width: 720px) {
   .traverse { height: auto; }
   .traverse-viewport { position: static; height: auto; overflow: visible; }
@@ -43,6 +40,14 @@
 html.reduced .traverse { height: auto; }
 html.reduced .traverse-viewport { position: static; height: auto; overflow: visible; }
 html.reduced .sheet-strip { flex-wrap: wrap; transform: none !important; animation: none !important; }
+
+/* cited-line pulse for :target and CITE.go */
+.entry:target, .entry.cited { animation: cite-pulse 1.2s var(--ease-nib); }
+
+/* 44px touch ergonomics */
+@media (max-width: 720px) {
+  .carry-btn, #closed .index a, .mark-btn { min-height: 44px; display: flex; align-items: center; width: 100%; }
+}
 
 /* ---- M5: negative block ---- */
 .objection { margin: 34px 0; }

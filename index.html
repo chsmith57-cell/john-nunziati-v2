@@ -17,6 +17,12 @@ document.documentElement.classList.add('js');
 if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('reduced');
 </script>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="stamp-rough" x="-8%" y="-12%" width="116%" height="124%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="1.6"/>
+  </filter>
+</svg>
 <main class="record" id="record-root">
 
   <!-- ============ MOVEMENT 1 — THE DOCKET ============ -->
@@ -55,7 +61,7 @@ if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentEle
     <div class="measure col-rule">
       <header class="speech-head mono">1AC — A case for the work — 8 min</header>
       <div class="numbered">
-        <div class="contention entry markable" data-line="14">
+        <div class="contention entry markable" data-line="14" id="line-14">
           <span class="mono">C-1 Workspace</span>
           <button class="mark-btn" data-mark="check" data-line="14" aria-pressed="false"><p class="mk">Where the work already happens.</p></button>
         </div>
@@ -63,13 +69,13 @@ if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentEle
           <span class="mono">C-2 Gemini Enterprise</span>
           <button class="mark-btn" data-mark="check" data-line="15" aria-pressed="false"><p class="mk">The model, at the desk.</p></button>
         </div>
-        <div class="contention entry markable" data-line="16">
+        <div class="contention entry markable" data-line="16" id="line-16">
           <span class="mono">C-3 Cloud AI</span>
           <button class="mark-btn" data-mark="check" data-line="16" aria-pressed="false"><p class="mk">The ground it all stands on.</p></button>
         </div>
       </div>
       <div class="entry numbered markable" data-line="17" style="margin-top: 54px;">
-        <h2 id="plan-claim" class="poster claim" data-plan style="font-size: var(--t4); max-width: 18ch;"><span class="hl">The work comes back</span></h2>
+        <h2 id="plan-claim" class="poster claim" data-plan data-pressure="thin" style="font-size: var(--t4); max-width: 18ch;"><span class="hl" data-pressure="smear">The work comes back</span></h2>
         <p style="margin-top: 16px; color: var(--toner-soft);">Senior Marketing Strategy Manager — Workspace, Gemini Enterprise &amp; Cloud AI.</p>
         <button class="mark-btn mono noprint" data-mark="check" data-line="17" aria-pressed="false" style="margin-top: 14px; color: var(--pencil);">Mark what you'd defend</button>
       </div>
@@ -114,7 +120,7 @@ if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentEle
           <section class="flow-col">
             <header class="speech-head mono">Workspace — 2024–25</header>
             <svg class="leader" width="120" height="14" viewBox="0 0 120 14" aria-hidden="true"><path data-draw d="M0 7 C 40 3, 80 11, 118 7"/></svg>
-            <div class="entry markable" data-line="22">
+            <div class="entry markable" data-line="22" id="line-22">
               <button class="mark-btn" data-mark="check" data-line="22" aria-pressed="false"><p class="mk">Strategy. The argument finds its room.</p></button>
             </div>
             <p class="poster claim is-open thru" style="font-size: var(--t3); margin-top: 26px;">The work comes back</p>
@@ -167,17 +173,17 @@ if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentEle
       <div class="numbered">
         <div class="objection entry" data-line="41" data-q="q1">
           <p class="poster claim">“The cost doesn't pencil.”</p>
-          <p class="answer">Answered — see <a href="#oneac" data-cite="14">line 14</a>. The work already happens. <span class="mono" style="color:var(--pencil);">(C-1, restated)</span></p>
+          <p class="answer">Answered — see <a href="#line-14" data-cite="14">line 14</a>. The work already happens. <span class="mono" style="color:var(--pencil);">(C-1, restated)</span></p>
           <button class="carry-btn mono noprint" data-carry="q1" aria-pressed="false">Carry this question to the ballot →</button>
         </div>
         <div class="objection entry" data-line="42" data-q="q2">
           <p class="poster claim">“Our data leaves.”</p>
-          <p class="answer">Answered — the ground it stands on is governed ground. See <a href="#oneac" data-cite="16">line 16</a>.</p>
+          <p class="answer">Answered — the ground it stands on is governed ground. See <a href="#line-16" data-cite="16">line 16</a>.</p>
           <button class="carry-btn mono noprint" data-carry="q2" aria-pressed="false">Carry this question to the ballot →</button>
         </div>
         <div class="objection entry" data-line="43" data-q="q3">
           <p class="poster claim">“People won't change how they work.”</p>
-          <p class="answer">Answered — see <a href="#flow" data-cite="22">line 22</a>. The argument found its room.</p>
+          <p class="answer">Answered — see <a href="#line-22" data-cite="22">line 22</a>. The argument found its room.</p>
           <button class="carry-btn mono noprint" data-carry="q3" aria-pressed="false">Carry this question to the ballot →</button>
         </div>
       </div>
@@ -190,6 +196,7 @@ if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentEle
   <section id="ballot" data-paper class="sheet" aria-label="The ballot — reason for decision" style="counter-reset: line 50;">
     <div class="measure" style="max-width: 760px;">
       <header class="speech-head mono">The ballot — reason for decision</header>
+      <p class="sr-only">The ballot has three parts: the question you carried from the negative block, the ledger of your own blue marks admitted as evidence, and the decision — sign the ruled line with your pointer, or use the button to sign with a standard check; any mark counts. The result is announced below.</p>
       <div class="form">
         <div class="rule-row">
           <p class="mono" style="color: var(--toner-soft); margin-bottom: 8px;">The question you carried</p>
@@ -210,7 +217,7 @@ if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentEle
             <p class="coach" aria-hidden="true" style="font-size:1.15rem;">right here.</p>
           </div>
           <button class="mono noprint" id="sign-check-btn" style="margin-top: 12px; border: 1px solid var(--toner-soft); padding: 9px 14px;">Sign with a check — any mark counts</button>
-          <p class="poster" id="verdict-line" style="font-size: var(--t3); margin-top: 22px; visibility: hidden;"><span class="hl">Signed. The work comes back.</span></p>
+          <p class="poster" id="verdict-line" role="status" aria-live="polite" style="font-size: var(--t3); margin-top: 22px; visibility: hidden;"><span class="hl" data-pressure="smear">Signed. The work comes back.</span></p>
         </div>
       </div>
     </div>
@@ -231,7 +238,7 @@ if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentEle
         <ol class="index mono" id="record-index"></ol>
       </nav>
       <button class="mono noprint" id="clear-btn" style="margin-top: 40px; border-top: 1px solid var(--pencil); padding-top: 16px;">Strike your marks — clear the record</button>
-      <p class="mono" id="clear-confirm" style="visibility: hidden; color: var(--toner-soft); margin-top: 8px;">The record is clean.</p>
+      <p class="mono" id="clear-confirm" role="status" aria-live="polite" style="visibility: hidden; color: var(--toner-soft); margin-top: 8px;">The record is clean.</p>
       <p style="margin-top: 56px;">Filed. Nothing further.</p>
     </div>
   </section>

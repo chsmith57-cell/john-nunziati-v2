@@ -79,7 +79,8 @@
 .tape::before {
   inset: 0;
   z-index: -2;
-  background-color: color-mix(in srgb, var(--signal) 52%, transparent);
+  /* tape is paper, not highlighter: yellow is reserved for what survives */
+  background-color: color-mix(in srgb, var(--paper-dim) 72%, var(--toner) 6%);
   background-image:
     linear-gradient(
       to bottom,
@@ -124,7 +125,8 @@
   border: 2px solid currentColor;
   border-radius: 0.08em;
   opacity: 0.85;
-  font: 700 0.78rem/1.05 ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-weight: 500; font-size: 0.78rem; line-height: 1.05;
   letter-spacing: 0.075em;
   text-align: center;
   text-transform: uppercase;
@@ -209,7 +211,8 @@
   padding: 0.4rem 0.25rem 0.15rem;
   color: var(--toner-soft);
   border-block-start: 1px dashed var(--pencil);
-  font: 0.72rem/1.35 ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 0.72rem; line-height: 1.35;
   letter-spacing: 0.025em;
   overflow-wrap: anywhere;
 }

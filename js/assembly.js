@@ -2,6 +2,9 @@
 (function () {
   'use strict';
   var R = INSCRIBE.reduced;
+  var HAS_IO = 'IntersectionObserver' in window;
+  if (!HAS_IO) document.documentElement.classList.add('reduced');   // no observers: serve the judge's copy
+  if (!HAS_IO) R = true;
   PRESSURE.start();
 
   /* ---- Generic inscription triggers ---- */
@@ -32,7 +35,7 @@
   /* ---- M2: the plan enters contested, then opens under the first swipe ---- */
   var plan = document.getElementById('plan-claim');
   if (plan) {
-    if (R) { plan.classList.add('is-open'); INSCRIBE.swipe(plan.querySelector('.hl')); }
+    if (R || !HAS_IO) { plan.classList.add('is-open'); INSCRIBE.swipe(plan.querySelector('.hl')); }
     else {
       new IntersectionObserver(function (es, obs) {
         es.forEach(function (en) {
@@ -131,7 +134,8 @@
     if (!btn || btn.disabled) return;
     applyCarry(btn.getAttribute('data-carry'), true);
   });
-  if (theysay) {
+  if (theysay && !HAS_IO) document.documentElement.classList.add('gutter-on');
+  if (theysay && HAS_IO) {
     new IntersectionObserver(function (es, obs) {
       es.forEach(function (en) {
         if (en.isIntersecting) { document.documentElement.classList.add('gutter-on'); }
@@ -164,17 +168,17 @@
 
   var pad = document.getElementById('sign-pad');
   var signed = false;
-  function verdict() {
+  function verdict(restoring) {
     if (signed) return;
     signed = true;
     var v = document.getElementById('verdict-line');
     v.style.visibility = 'visible';
     var span = v.querySelector('.hl');
-    if (!R) { v.classList.add('w8'); INSCRIBE.writeOn(v).then(function () { INSCRIBE.swipe(span); }); }
+    if (!R && !restoring) { v.classList.add('w8'); INSCRIBE.writeOn(v).then(function () { INSCRIBE.swipe(span); }); }
     else INSCRIBE.swipe(span);
     var st = document.getElementById('final-stamp');
     if (st) st.style.visibility = 'visible';
-    MARKS.seal({ sig: pad ? pad.dataset.sig || 'check' : 'check' });
+    if (!restoring) MARKS.seal({ sig: pad ? pad.dataset.sig || 'check' : 'check' });
   }
   if (pad) {
     var drawing = false, pts = [], path = null, inkLen = 0, lastP = null;
@@ -182,8 +186,10 @@
       var r = pad.getBoundingClientRect();
       return [Math.round((e.clientX - r.left) * 2) / 2, Math.round((e.clientY - r.top) * 2) / 2];
     }
+    var activeSigPtr = null;
     pad.addEventListener('pointerdown', function (e) {
-      drawing = true;
+      if (!e.isPrimary || (e.button && e.button !== 0)) return;   // one pen, primary button only
+      drawing = true; activeSigPtr = e.pointerId; inkLen = 0;
       try { pad.setPointerCapture(e.pointerId); } catch (err) { /* synthetic or stale pointer: draw anyway */ }
       pts = [svgPoint(e)]; lastP = pts[0];
       path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -191,7 +197,7 @@
       e.preventDefault();
     });
     pad.addEventListener('pointermove', function (e) {
-      if (!drawing || !path) return;
+      if (!drawing || !path || e.pointerId !== activeSigPtr) return;
       var p = svgPoint(e);
       var d = Math.hypot(p[0] - lastP[0], p[1] - lastP[1]);
       if (d < 2) return;
@@ -199,19 +205,23 @@
       if (pts.length < 400) pts.push(p);
       path.setAttribute('d', 'M' + pts.map(function (q) { return q[0] + ' ' + q[1]; }).join(' L '));
     });
-    function up() {
-      if (!drawing) return;
-      drawing = false;
-      if (inkLen > 120) { pad.dataset.sig = 'drawn'; verdict(); }
-    }
-    pad.addEventListener('pointerup', up);
-    pad.addEventListener('pointercancel', up);
-    // returning judge: the ballot is already signed
+    pad.addEventListener('pointerup', function (e) {
+      if (!drawing || e.pointerId !== activeSigPtr) return;
+      drawing = false; activeSigPtr = null;
+      if (inkLen > 120 && path) { pad.dataset.sig = path.getAttribute('d') || 'check'; verdict(); }
+    });
+    pad.addEventListener('pointercancel', function (e) {   // a cancelled stroke is not a signature
+      if (e.pointerId !== activeSigPtr) return;
+      drawing = false; activeSigPtr = null;
+      if (path && inkLen <= 120) { path.remove(); path = null; }
+    });
+    // returning judge: restore their actual ink, do not reseal
     if (MARKS.state.verdict) {
       var mark = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      mark.setAttribute('d', 'M 20 70 L 45 95 L 110 30');
+      var storedSig = MARKS.state.sig;
+      mark.setAttribute('d', (storedSig && storedSig.indexOf('M') === 0) ? storedSig : 'M 20 70 L 45 95 L 110 30');
       pad.appendChild(mark);
-      verdict();
+      verdict(true);
     }
   }
   var checkBtn = document.getElementById('sign-check-btn');
@@ -228,7 +238,8 @@
   /* ---- M7: index of the record + clear ---- */
   var idx = document.getElementById('record-index');
   if (idx) {
-    document.querySelectorAll('[data-line]').forEach(function (el) {
+    // canonical entries only — mark buttons carry data-line for storage, never for identity
+    document.querySelectorAll('.entry[data-line]').forEach(function (el) {
       var n = el.getAttribute('data-line');
       el.setAttribute('aria-label', 'line ' + n);
       if (!el.id) el.id = 'line-' + n;
@@ -241,22 +252,42 @@
       idx.appendChild(li);
     });
   }
+  function resetRecordUI() {
+    MARKS.clear();
+    // blue marks off
+    document.querySelectorAll('[data-mark][aria-pressed="true"]').forEach(function (b) { b.setAttribute('aria-pressed', 'false'); var mk = b.querySelector('.mk'); if (mk) mk.classList.remove('underline-blue'); });
+    // objections rearmed: strikes lifted, claims restored, carry buttons live again
+    document.querySelectorAll('.objection').forEach(function (obj) {
+      var claim = obj.querySelector('.claim');
+      claim.classList.remove('is-collapsed', 'is-open', 'is-swiped', 'hl', 'struck-text');
+      delete claim.dataset.struck;
+      claim.querySelectorAll('.strike-svg').forEach(function (s) { s.remove(); });
+      var btn = obj.querySelector('[data-carry]');
+      btn.disabled = false;
+      btn.setAttribute('aria-pressed', 'false');
+      btn.textContent = 'Carry this question to the ballot →';
+    });
+    var cq = document.getElementById('carried-q');
+    if (cq) cq.textContent = QUOTES.q2;
+    // ballot rearmed
+    if (pad) { pad.querySelectorAll('path').forEach(function (p) { p.remove(); }); pad.dataset.sig = ''; }
+    var v = document.getElementById('verdict-line');
+    if (v) { v.style.visibility = 'hidden'; v.classList.remove('w8', 'is-written'); delete v.dataset.inscribed; var hl = v.querySelector('.hl'); if (hl) hl.classList.remove('is-swiped'); }
+    var st = document.getElementById('final-stamp'); if (st) st.style.visibility = 'hidden';
+    signed = false;
+  }
   var clearBtn = document.getElementById('clear-btn');
   if (clearBtn) clearBtn.addEventListener('click', function () {
     document.querySelectorAll('#notes-ledger li:not(#notes-empty)').forEach(function (li) { li.classList.add('struck-blue'); });
     setTimeout(function () {
-      MARKS.clear();
-      document.querySelectorAll('[data-mark][aria-pressed="true"]').forEach(function (b) { b.setAttribute('aria-pressed', 'false'); var mk = b.querySelector('.mk'); if (mk) mk.classList.remove('underline-blue'); });
-      if (pad) { pad.querySelectorAll('path').forEach(function (p) { p.remove(); }); pad.dataset.sig = ''; }
-      var v = document.getElementById('verdict-line'); if (v) v.style.visibility = 'hidden';
-      signed = false;
+      resetRecordUI();
       document.getElementById('clear-confirm').style.visibility = 'visible';
     }, R ? 0 : 700);
   });
 
   /* ---- The pen retires at the closed record ---- */
   var closed = document.getElementById('closed');
-  if (closed && window.PEN && PEN.retire) {
+  if (closed && window.PEN && PEN.retire && HAS_IO) {
     new IntersectionObserver(function (es) {
       es.forEach(function (en) { if (en.isIntersecting) PEN.retire(); });
     }, { threshold: 0.4 }).observe(closed);

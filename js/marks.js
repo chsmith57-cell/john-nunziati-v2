@@ -3,11 +3,22 @@
   'use strict';
   var KEY = 'nr.record.v1';
   var mem = null;
+  var TYPES = { check: 1, underline: 1 };
+  var CARRY = { q1: 1, q2: 1, q3: 1 };
   function load() {
     if (mem) return mem;
     try { mem = JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { mem = null; }
-    if (!mem || typeof mem !== 'object') mem = { marks: [], carried: null, sig: null, verdict: false };
-    if (!Array.isArray(mem.marks)) mem.marks = [];
+    if (!mem || typeof mem !== 'object') mem = {};
+    // schema validation: discard invalid records individually, never trust the parse
+    var marks = Array.isArray(mem.marks) ? mem.marks.filter(function (m) {
+      return m && TYPES[m.type] && typeof m.line === 'number' && isFinite(m.line) && m.line > 0 && m.line < 200;
+    }).map(function (m) { return { id: m.line + ':' + m.type, line: m.line, type: m.type, text: String(m.text || '').slice(0, 80) }; }) : [];
+    mem = {
+      marks: marks,
+      carried: CARRY[mem.carried] ? mem.carried : null,
+      sig: (typeof mem.sig === 'string' && mem.sig.length < 6000) ? mem.sig : null,
+      verdict: mem.verdict === true,
+    };
     return mem;
   }
   function save() {

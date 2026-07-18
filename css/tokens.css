@@ -92,6 +92,11 @@ html.reduced .hl.is-swiped::before { transition: none; }
 /* ---- The one scalar: pressure readers ---- */
 [data-pressure] { --dry: calc(var(--pressure) * 1); }
 [data-pressure="thin"] { opacity: calc(1 - var(--dry) * 0.4); }
+[data-pressure="smear"].is-swiped::before {
+  filter: blur(calc(var(--dry) * 1px));
+  translate: calc(var(--dry) * 3px) 0;
+}
+[data-pressure="dry"] path { stroke-dasharray: calc(12px + var(--dry) * -0px) calc(var(--dry) * 5px); }
 
 /* ---- Inscription pre-states (JS only; default DOM is the end-state) ---- */
 html.js:not(.reduced) .w8 { clip-path: inset(0 100% 0 0); }
