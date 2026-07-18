@@ -1,0 +1,123 @@
+/* ON THE RECORD — tokens. Color is testimony; most of the page is silence. */
+:root {
+  --paper: #F5F1E6; --paper-dim: #E8E2D2;
+  --toner: #24201A; --toner-soft: #5C564B; --pencil: #8C8576;
+  --signal: #E8FF3D; --visitor-ink: #2456A6; --strike: #D63A2A;
+}
+@supports (color: oklch(50% 0 0)) {
+  :root {
+    --paper: oklch(0.968 0.012 92); --paper-dim: oklch(0.935 0.016 90);
+    --toner: oklch(0.24 0.014 85); --toner-soft: oklch(0.42 0.015 85);
+    --pencil: oklch(0.60 0.012 85);
+    --signal: oklch(0.945 0.20 108); --visitor-ink: oklch(0.42 0.10 255);
+    --strike: oklch(0.55 0.20 27);
+  }
+}
+:root {
+  --t0: clamp(0.78rem, 0.75rem + 0.2vw, 0.875rem);
+  --t1: 1rem;
+  --t2: clamp(1.25rem, 1.1rem + 0.8vw, 1.5rem);
+  --t3: clamp(1.6rem, 1.3rem + 1.8vw, 2.4rem);
+  --t4: clamp(2.2rem, 1.6rem + 4vw, 4.5rem);
+  --t5: clamp(3rem, 2rem + 8vw, 8.5rem);
+  --ease-nib: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-swipe: cubic-bezier(0.65, 0, 0.35, 1);
+  --pressure: 0;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { color-scheme: light; scroll-behavior: smooth; overflow-x: hidden; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  background: var(--paper); color: var(--toner);
+  font-family: 'Newsreader', Georgia, serif;
+  font-size: var(--t1); line-height: 1.55;
+  font-optical-sizing: auto;
+  font-feature-settings: 'onum' 1;
+  overflow-x: hidden;
+}
+.mono {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: var(--t0); line-height: 1.4;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  font-feature-settings: 'tnum' 1; font-variant-numeric: tabular-nums;
+}
+.poster {
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-variation-settings: 'wght' 560, 'wdth' 100;
+  line-height: 0.98; letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.coach {
+  font-family: 'Caveat', cursive; font-size: 1.35rem;
+  color: var(--pencil); transform: rotate(-2deg); display: inline-block;
+}
+.coach--red { color: var(--strike); transform: rotate(1.5deg); }
+.serif-off { font-style: italic; }  /* the off-record voice: Newsreader ital */
+p { text-wrap: pretty; max-width: 62ch; }
+
+a { color: var(--visitor-ink); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--visitor-ink); outline-offset: 3px; }
+button { font: inherit; background: none; border: none; cursor: pointer; color: inherit; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Layout: the sheet */
+main { position: relative; }
+section[data-paper] { position: relative; padding: clamp(48px, 8vw, 120px) clamp(20px, 6vw, 96px); }
+.measure { max-width: 900px; margin-inline: auto; }
+
+/* ---- Argument-state variables: the wdth axis carries plot ---- */
+.poster, .claim { transition: font-variation-settings 300ms var(--ease-nib), color 300ms var(--ease-nib); }
+.is-contested { font-variation-settings: 'wght' 880, 'wdth' 100; transition-duration: 200ms; }
+.is-open      { font-variation-settings: 'wght' 800, 'wdth' 125; }
+.is-collapsed { font-variation-settings: 'wght' 400, 'wdth' 62.5; color: var(--pencil); }
+
+/* ---- Highlighter (multiply, behind text, budgeted) ---- */
+.hl { position: relative; }
+.hl::before {
+  content: ''; position: absolute; inset: 8% -2% 6% -1%;
+  background: var(--signal); mix-blend-mode: multiply; z-index: -1;
+  transform: scaleX(0); transform-origin: left center;
+}
+.hl.is-swiped::before { transform: scaleX(1.08); transition: transform 240ms var(--ease-swipe); }
+html.reduced .hl.is-swiped::before { transition: none; }
+@media (forced-colors: active) { .hl.is-swiped { text-decoration: underline; } .hl::before { display: none; } }
+
+/* ---- Strike: the record never deletes ---- */
+.entry { position: relative; }
+.struck-text { color: var(--pencil); }
+.strike-svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.strike-svg path { stroke: var(--strike); stroke-width: 2.5; fill: none; stroke-linecap: round; }
+
+/* ---- The one scalar: pressure readers ---- */
+[data-pressure] { --dry: calc(var(--pressure) * 1); }
+[data-pressure="thin"] { opacity: calc(1 - var(--dry) * 0.4); }
+
+/* ---- Inscription pre-states (JS only; default DOM is the end-state) ---- */
+html.js:not(.reduced) .w8 { clip-path: inset(0 100% 0 0); }
+html.js:not(.reduced) .w8.is-written { clip-path: inset(0 -2% 0 0); }
+html.js:not(.reduced) svg .d8 { /* dash set by JS */ }
+
+/* ---- Gutter line numbers: the record numbers itself ---- */
+.record { counter-reset: line 0; }
+.entry { counter-increment: line; }
+.numbered .entry { position: relative; }
+.numbered .entry::before {
+  content: counter(line, decimal-leading-zero);
+  position: absolute; left: -3.2em; top: 0.35em;
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem;
+  color: var(--pencil); opacity: 0; transition: opacity 600ms var(--ease-nib);
+  font-feature-settings: 'tnum' 1;
+}
+.gutter-on .numbered .entry::before { opacity: 0.85; }
+.cited { animation: cite-pulse 1.2s var(--ease-nib); }
+@keyframes cite-pulse { 30% { background: color-mix(in oklab, var(--pencil) 18%, transparent); } }
+
+/* ---- Print: the record prints; the ballot is page one ---- */
+@media print {
+  #pen-cursor, #cite-chip, .noprint { display: none !important; }
+  body { background: #fff; }
+  section[data-paper] { padding: 24px 0; }
+  #ballot { break-before: page; }
+  .w8 { clip-path: none !important; }
+}

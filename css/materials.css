@@ -1,0 +1,247 @@
+/*
+ * Shared paper-material primitives.
+ *
+ * Add this SVG once near the start of <body> when using .stamp. It keeps the
+ * filter in the document while remaining hidden from assistive technology:
+ *
+ * <svg aria-hidden="true" width="0" height="0" style="position:absolute">
+ *   <filter id="stamp-rough" x="-8%" y="-12%" width="116%" height="124%">
+ *     <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2"
+ *       seed="17" result="stampNoise" />
+ *     <feDisplacementMap in="SourceGraphic" in2="stampNoise" scale="0.8"
+ *       xChannelSelector="R" yChannelSelector="G" />
+ *   </filter>
+ * </svg>
+ */
+
+.sheet {
+  position: relative;
+  isolation: isolate;
+  box-sizing: border-box;
+  max-inline-size: 100%;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--toner) 3%, transparent), transparent 1.15rem),
+    linear-gradient(to left, color-mix(in srgb, var(--toner) 3%, transparent), transparent 1.15rem),
+    linear-gradient(to bottom, color-mix(in srgb, var(--toner) 3%, transparent), transparent 1.15rem),
+    linear-gradient(to top, color-mix(in srgb, var(--toner) 3%, transparent), transparent 1.15rem),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Cfilter id='fiber' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.018 .62' numOctaves='3' seed='23' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .02 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23fiber)'/%3E%3C/svg%3E");
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat;
+  background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 240px 240px;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-block-size: 2rem;
+  max-inline-size: min(12rem, 72vw);
+  padding: 0.38rem 1.5rem 0.3rem 1.1rem;
+  overflow-wrap: anywhere;
+  color: var(--toner-soft);
+  background-color: var(--paper-dim);
+  border: 1px solid var(--pencil);
+  border-block-end: 0;
+  clip-path: polygon(0.65rem 0, 100% 0, 100% 100%, 0 100%);
+}
+
+.tab--tr {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: clamp(0.5rem, 5vw, 2rem);
+  z-index: -1;
+  transform: translateY(-100%);
+  transform-origin: bottom right;
+}
+
+.tape {
+  --tape-angle: -1.2deg;
+  position: absolute;
+  z-index: 2;
+  display: block;
+  box-sizing: border-box;
+  inline-size: min(12rem, 70vw);
+  max-inline-size: 100%;
+  block-size: 2.15rem;
+  transform: rotate(var(--tape-angle));
+  transform-origin: center;
+  pointer-events: none;
+  isolation: isolate;
+}
+
+.tape::before,
+.tape::after {
+  position: absolute;
+  content: '';
+  pointer-events: none;
+}
+
+.tape::before {
+  inset: 0;
+  z-index: -2;
+  background-color: color-mix(in srgb, var(--signal) 52%, transparent);
+  background-image:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--paper) 26%, transparent),
+      transparent 24%,
+      transparent 76%,
+      color-mix(in srgb, var(--toner) 8%, transparent)
+    ),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Cfilter id='fiber' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.018 .62' numOctaves='3' seed='23' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .02 0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23fiber)'/%3E%3C/svg%3E");
+  background-repeat: no-repeat, repeat;
+  background-size: 100% 100%, 240px 240px;
+  clip-path: polygon(0.3rem 4%, 99.7% 0, 100% 94%, 0.2rem 100%, 0 15%);
+  mix-blend-mode: multiply;
+}
+
+.tape::after {
+  inset: 0.08rem 0;
+  z-index: -1;
+  background-image: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--toner) 12%, transparent),
+    transparent 0.7rem,
+    transparent calc(100% - 0.7rem),
+    color-mix(in srgb, var(--toner) 10%, transparent)
+  );
+  mix-blend-mode: multiply;
+}
+
+.tape--r {
+  --tape-angle: 1.2deg;
+}
+
+.stamp {
+  --stamp-angle: -1.1deg;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  max-inline-size: 100%;
+  padding: 0.18em 0.48em 0.12em;
+  color: var(--toner-soft);
+  border: 2px solid currentColor;
+  border-radius: 0.08em;
+  opacity: 0.85;
+  font: 700 0.78rem/1.05 ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  letter-spacing: 0.075em;
+  text-align: center;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+  mix-blend-mode: multiply;
+  filter: url("#stamp-rough");
+  transform: rotate(var(--stamp-angle));
+  transform-origin: center;
+}
+
+.stamp--exhibit,
+.stamp--extended,
+.stamp--dropped,
+.stamp--off {
+  --stamp-angle: -1.1deg;
+}
+
+.clip {
+  position: absolute;
+  inset-block-start: -1.05rem;
+  inset-inline-end: clamp(0.55rem, 6vw, 1.5rem);
+  z-index: 3;
+  display: block;
+  inline-size: 0.82rem;
+  block-size: 2.85rem;
+  color: var(--toner-soft);
+  transform: rotate(8deg);
+  transform-origin: center;
+  pointer-events: none;
+}
+
+.clip::before,
+.clip::after {
+  position: absolute;
+  box-sizing: border-box;
+  content: '';
+  pointer-events: none;
+}
+
+.clip::before {
+  inset: 0;
+  border: 2px solid currentColor;
+  border-block-end-color: transparent;
+  border-radius: 999px 999px 0 0;
+}
+
+.clip::after {
+  inset-block-start: 0.34rem;
+  inset-inline-start: 0.2rem;
+  inline-size: 0.42rem;
+  block-size: 2.05rem;
+  border: 1px solid currentColor;
+  border-block-end-color: transparent;
+  border-radius: 999px 999px 0 0;
+}
+
+.halftone-frame {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  inline-size: fit-content;
+  max-inline-size: 100%;
+  margin: 0;
+  padding: 6px;
+  color: var(--toner);
+  background-color: var(--paper);
+  border: 1px solid var(--pencil);
+}
+
+.halftone-frame img,
+.halftone-frame svg {
+  display: block;
+  max-inline-size: 100%;
+  block-size: auto;
+  color: var(--toner);
+}
+
+.halftone-frame figcaption {
+  box-sizing: border-box;
+  max-inline-size: 100%;
+  margin-block-start: 6px;
+  padding: 0.4rem 0.25rem 0.15rem;
+  color: var(--toner-soft);
+  border-block-start: 1px dashed var(--pencil);
+  font: 0.72rem/1.35 ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  letter-spacing: 0.025em;
+  overflow-wrap: anywhere;
+}
+
+@media (forced-colors: active) {
+  .sheet,
+  .tape::before,
+  .tape::after {
+    background-image: none;
+  }
+
+  .tab,
+  .stamp,
+  .clip::before,
+  .clip::after,
+  .halftone-frame,
+  .halftone-frame figcaption {
+    border-color: currentColor;
+  }
+
+  .tape::before {
+    border: 1px solid currentColor;
+  }
+
+  .tape::before,
+  .tape::after,
+  .stamp {
+    mix-blend-mode: normal;
+  }
+
+  .stamp {
+    opacity: 1;
+    filter: none;
+  }
+}
